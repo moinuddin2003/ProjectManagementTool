@@ -1,41 +1,34 @@
 "use client"
-
-import { useState, useCallback } from "react"
+import { useState } from "react"
 
 export const useAuth = () => {
-  const [authState, setAuthState] = useState({
-    user: null,
-    isAuthenticated: false,
-    isLoading: false,
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [loginForm, setLoginForm] = useState({
+    email: "",
+    password: "",
   })
 
-  const login = useCallback(async (credentials) => {
-    setAuthState((prev) => ({ ...prev, isLoading: true }))
-
+  const handleLogin = async () => {
+    setIsLoading(true)
     // Simulate API call
     setTimeout(() => {
-      setAuthState({
-        user: {
-          username: credentials.username,
-          name: "Carter Kenter",
-        },
-        isAuthenticated: true,
-        isLoading: false,
-      })
-    }, 1000)
-  }, [])
+      setIsLoggedIn(true)
+      setIsLoading(false)
+    }, 1500)
+  }
 
-  const logout = useCallback(() => {
-    setAuthState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-    })
-  }, [])
+  const logout = () => {
+    setIsLoggedIn(false)
+    setLoginForm({ email: "", password: "" })
+  }
 
   return {
-    ...authState,
-    login,
+    isLoggedIn,
+    loginForm,
+    setLoginForm,
+    isLoading,
+    handleLogin,
     logout,
   }
 }

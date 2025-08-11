@@ -1,58 +1,54 @@
 "use client"
-import { ProgressBar } from "../ui/ProgressBar"
 
-export const FeatureCard = ({ feature, onClick, variant = "grid" }) => {
+export const FeatureCard = ({ feature, onClick, variant = "default" }) => {
+  const getProgressColor = (value) => {
+    if (value >= 70) return "bg-green-500"
+    if (value >= 40) return "bg-orange-500"
+    return "bg-gray-400"
+  }
+
   if (variant === "detailed") {
     return (
-      <div
-        className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-md transition-shadow"
-        onClick={() => onClick(feature)}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">{feature.name}</h3>
-          <div className="flex items-center space-x-2">
-            <img
-              src={feature.assignee.avatar || "/placeholder.svg?height=32&width=32"}
-              alt={feature.assignee.name}
-              className="w-8 h-8 rounded-full"
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <span className="text-sm font-medium text-gray-700 w-24">DUE DATE</span>
+          <div className="flex-1 bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full ${getProgressColor(feature.progress.dueDate)}`}
+              style={{ width: `${feature.progress.dueDate}%` }}
             />
-            <span className="text-sm text-gray-600">{feature.assignee.name}</span>
           </div>
         </div>
-
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">DUE DATE</span>
-            </div>
-            <ProgressBar value={feature.dueDate} color="orange" />
+        <div className="flex items-center space-x-4">
+          <span className="text-sm font-medium text-gray-700 w-24">STATUS</span>
+          <div className="flex-1 bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full ${getProgressColor(feature.progress.status)}`}
+              style={{ width: `${feature.progress.status}%` }}
+            />
           </div>
-
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">STATUS</span>
-            </div>
-            <ProgressBar value={feature.status} color="gray" />
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="text-sm font-medium text-gray-700 w-24">PRIORITY</span>
+          <div className="flex-1 bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full ${getProgressColor(feature.progress.priority)}`}
+              style={{ width: `${feature.progress.priority}%` }}
+            />
           </div>
-
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">PRIORITY</span>
-            </div>
-            <ProgressBar value={feature.priority} color="gray" />
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="text-sm font-medium text-gray-700 w-24">DEPENDENCIES</span>
+          <div className="flex-1 bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full ${getProgressColor(feature.progress.dependencies)}`}
+              style={{ width: `${feature.progress.dependencies}%` }}
+            />
           </div>
-
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">DEPENDENCIES</span>
-            </div>
-            <ProgressBar value={feature.dependencies} color="gray" />
-          </div>
-
-          <div>
-            <div className="text-sm text-gray-600 mb-2">DESCRIPTION</div>
-            <div className="bg-gray-100 rounded p-3 text-sm text-gray-700">{feature.description}</div>
-          </div>
+        </div>
+        <div className="pt-4">
+          <span className="text-sm font-medium text-gray-700">DESCRIPTION</span>
+          <div className="mt-2 h-16 bg-gray-100 rounded"></div>
         </div>
       </div>
     )
@@ -60,26 +56,29 @@ export const FeatureCard = ({ feature, onClick, variant = "grid" }) => {
 
   return (
     <div
-      className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+      className={`bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow ${
+        feature.highlighted ? "ring-2 ring-blue-500" : ""
+      }`}
       onClick={() => onClick(feature)}
     >
-      <div className="mb-3">
-        <h3 className="font-medium text-gray-900 mb-2">{feature.name}</h3>
-        <div className="flex space-x-2 mb-3">
-          <ProgressBar value={feature.dueDate} color={feature.statusColor} className="flex-1" />
-          <ProgressBar value={feature.status} color="orange" className="flex-1" />
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-medium text-gray-900">{feature.name}</h3>
+        <div className="flex space-x-1">
+          <div className="w-4 h-2 bg-blue-500 rounded"></div>
+          <div className="w-4 h-2 bg-orange-500 rounded"></div>
+          {feature.highlighted && <div className="w-4 h-2 bg-green-500 rounded"></div>}
         </div>
       </div>
 
       <div className="flex items-center space-x-2">
         <img
-          src={feature.assignee.avatar || "/placeholder.svg?height=24&width=24"}
+          src={feature.assignee.avatar || "/placeholder.svg"}
           alt={feature.assignee.name}
           className="w-6 h-6 rounded-full"
         />
         <div>
-          <div className="text-sm font-medium text-gray-900">{feature.assignee.name}</div>
-          <div className="text-xs text-gray-500">{feature.lastActivity}</div>
+          <p className="text-sm font-medium text-gray-900">{feature.assignee.name}</p>
+          <p className="text-xs text-gray-500">{feature.lastActivity}</p>
         </div>
       </div>
     </div>

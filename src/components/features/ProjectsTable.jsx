@@ -1,43 +1,46 @@
-import { Button } from "../ui/Button"
-import { Filter, ChevronDown } from "lucide-react"
+"use client"
+import { ChevronDown, Filter } from "react-feather"
 
-export const ProjectsTable = ({ projects }) => {
-  const getHealthBadgeColor = (health) => {
-    switch (health) {
-      case "At Risk":
-        return "bg-red-100 text-red-800 border-red-200"
-      case "Good":
-        return "bg-green-100 text-green-800 border-green-200"
-      case "Warning":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+export const ProjectsTable = ({ projects, onCreateProject }) => {
+  const getHealthBadge = (health) => {
+    const colors = {
+      "At Risk": "bg-red-100 text-red-800",
+      Good: "bg-green-100 text-green-800",
     }
+
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[health] || "bg-gray-100 text-gray-800"}`}>
+        {health}
+      </span>
+    )
   }
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">Projects (3)</h2>
-          <div className="flex items-center space-x-3">
-            <button className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Projects ({projects.length})</h2>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+            <button className="flex items-center justify-center space-x-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg">
               <span>List View</span>
               <ChevronDown className="w-4 h-4" />
             </button>
-            <button className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+            <button className="flex items-center justify-center space-x-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg">
               <Filter className="w-4 h-4" />
               <span>Filter</span>
             </button>
-            <Button size="sm" className="bg-blue-500 hover:bg-blue-600">
+            <button
+              onClick={onCreateProject}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
               + Create Project
-            </Button>
+            </button>
           </div>
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[640px]">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -62,13 +65,7 @@ export const ProjectsTable = ({ projects }) => {
               <tr key={project.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{project.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{project.owner}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getHealthBadgeColor(project.health)}`}
-                  >
-                    {project.health}
-                  </span>
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{getHealthBadge(project.health)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{project.startDate}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{project.endDate}</td>
               </tr>
