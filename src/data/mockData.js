@@ -4,6 +4,7 @@ export const mockProjects = [
     name: "Dashboard Features",
     owner: "Carter Kenter",
     health: "At Risk",
+    healthColor: "red", // Added missing healthColor property
     startDate: "Sep 2 2024",
     endDate: "Aug 30 2025",
   },
@@ -12,6 +13,7 @@ export const mockProjects = [
     name: "Setup Data Analytics",
     owner: "Carter Kenter",
     health: "Good",
+    healthColor: "green", // Added missing healthColor property
     startDate: "Oct 2 2024",
     endDate: "Sep 30 2025",
   },
@@ -20,6 +22,7 @@ export const mockProjects = [
     name: "Project Name",
     owner: "Carter Kenter",
     health: "Good",
+    healthColor: "green", // Added missing healthColor property
     startDate: "Dec 2 2024",
     endDate: "Nov 30 2025",
   },
@@ -31,7 +34,7 @@ export const mockFeatures = [
     name: "Feature 1",
     assignee: {
       name: "Jamal Jackson",
-      avatar: "/placeholder.svg?height=32&width=32",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/300",
     },
     progress: {
       dueDate: 75,
@@ -47,7 +50,7 @@ export const mockFeatures = [
     name: "Feature 2",
     assignee: {
       name: "Trisha Tran",
-      avatar: "/placeholder.svg?height=32&width=32",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/400",
     },
     progress: {
       dueDate: 60,
@@ -63,7 +66,7 @@ export const mockFeatures = [
     name: "Feature 3",
     assignee: {
       name: "Nancy Noo",
-      avatar: "/placeholder.svg?height=32&width=32",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/500",
     },
     progress: {
       dueDate: 90,
@@ -79,7 +82,7 @@ export const mockFeatures = [
     name: "Feature 4",
     assignee: {
       name: "Jamal Jackson",
-      avatar: "/placeholder.svg?height=32&width=32",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/700",
     },
     progress: {
       dueDate: 40,
@@ -95,7 +98,7 @@ export const mockFeatures = [
     name: "Feature 5",
     assignee: {
       name: "Trisha Tran",
-      avatar: "/placeholder.svg?height=32&width=32",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/600",
     },
     progress: {
       dueDate: 55,
@@ -111,7 +114,7 @@ export const mockFeatures = [
     name: "Feature 6",
     assignee: {
       name: "Nancy Noo",
-      avatar: "/placeholder.svg?height=32&width=32",
+      avatar: "https://testingbot.com/free-online-tools/random-avatar/400",
     },
     progress: {
       dueDate: 80,

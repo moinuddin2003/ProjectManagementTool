@@ -2,7 +2,7 @@
 import { useState } from "react"
 import DashboardLayout from "./components/layout/DashboardLayout/DashboardLayout"
 import LoginPage from "./components/auth/LoginPage"
-import { ProjectsTable } from "./components/features/ProjectsTable"
+import ProjectsView from "./components/projects/ProjectsView"
 import { FeatureCard } from "./components/features/FeatureCard"
 import { AIAssistantModal } from "./components/features/AIAssistantModal"
 import { StatusUpdateModal } from "./components/features/StatusUpdateModal"
@@ -20,9 +20,9 @@ function App() {
   const [selectedFeature, setSelectedFeature] = useState(null)
   const [showAIModal, setShowAIModal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
-  const [showCreateProjectModal, setShowCreateProjectModal] = useState(false) // Added create project modal state
+  const [showCreateProjectModal, setShowCreateProjectModal] = useState(false)
+  const [projects, setProjects] = useState(mockProjects)
   const [comment, setComment] = useState("")
-
   // Navigation items structure
   const navItems = [
     {
@@ -45,8 +45,65 @@ function App() {
     setShowMobileMenu(false) // Close mobile menu when item is clicked
   }
 
-  if (!isLoggedIn) {
-    return <LoginPage loginForm={loginForm} setLoginForm={setLoginForm} onLogin={handleLogin} isLoading={isLoading} />
+  const handleCreateProject = () => {
+    // console.log("Opening create project modal") // Added debug log
+    setShowCreateProjectModal(true)
+  }
+
+  const handleProjectCreated = (projectData) => {
+    // console.log("Form data received:", projectData)
+
+    const getHealthStatus = (projectType) => {
+      const healthMap = {
+        "Software Development": "Good",
+        Marketing: "At Risk",
+        Construction: "Good",
+        Internal: "Good",
+        Research: "At Risk",
+      }
+      return healthMap[projectType] || "Good"
+    }
+
+    const getHealthColor = (health) => {
+      const colorMap = {
+        Good: "green",
+        "At Risk": "red",
+        "On Hold": "yellow",
+        Completed: "blue",
+      }
+      return colorMap[health] || "green"
+    }
+
+    const health = getHealthStatus(projectData.projectType)
+
+    const newProject = {
+      id: Date.now(),
+      name: projectData.projectName,
+      owner: projectData.client || "Carter Kenter",
+      health: health,
+      healthColor: getHealthColor(health),
+      startDate: new Date(projectData.startDate).toLocaleDateString(),
+      endDate: new Date(projectData.endDate).toLocaleDateString(),
+      description: projectData.description,
+      type: projectData.projectType,
+      client: projectData.client,
+      estimatedDuration: projectData.estimatedDuration,
+    }
+
+    // console.log("Creating new project:", newProject)
+    // console.log("Current projects before update:", projects)
+
+    const updatedProjects = [newProject, ...projects]
+    // console.log("Updated projects array:", updatedProjects)
+    // console.log("New projects count:", updatedProjects.length)
+
+    setProjects(updatedProjects)
+    setShowCreateProjectModal(false)
+
+    // setTimeout(() => {
+    //   console.log("Final projects state:", updatedProjects.length)
+    //   setDummyState((prev) => !prev)
+    // }, 100)
   }
 
   const renderContent = () => {
@@ -54,12 +111,10 @@ function App() {
       case "Projects":
       case "All Projects":
       case "Active Projects":
+        // console.log("Rendering projects view with", projects.length, "projects") // Added debug log
         return (
           <div className="space-y-6">
-            <ProjectsTable projects={mockProjects}
-            onCreateProject={() => setShowCreateProjectModal(true)} // Pass create project handler
-
-            />
+            <ProjectsView projects={projects} onCreateProject={handleCreateProject} />
           </div>
         )
       case "Tasks":
@@ -142,6 +197,10 @@ function App() {
     }
   }
 
+  if (!isLoggedIn) {
+    return <LoginPage loginForm={loginForm} setLoginForm={setLoginForm} onLogin={handleLogin} isLoading={isLoading} />
+  }
+
   return (
     <DashboardLayout
       showMobileMenu={showMobileMenu}
@@ -156,6 +215,11 @@ function App() {
         isOpen={showStatusModal}
         onClose={() => setShowStatusModal(false)}
         taskName={selectedFeature?.name}
+      />
+      <CreateProjectModal
+        isOpen={showCreateProjectModal}
+        onClose={() => setShowCreateProjectModal(false)}
+        onProjectCreated={handleProjectCreated}
       />
     </DashboardLayout>
   )

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { X, Calendar, Upload, File, Trash2 } from "lucide-react"
 
-export const CreateProjectModal = ({ isOpen, onClose }) => {
+export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
   const [formData, setFormData] = useState({
     projectName: "",
     description: "",
@@ -177,8 +177,9 @@ export const CreateProjectModal = ({ isOpen, onClose }) => {
     e.preventDefault()
     if (validateForm()) {
       console.log("Creating project:", formData, "Attachments:", attachments)
-      // Here you would typically send the data to your backend
-      onClose()
+      if (onProjectCreated) {
+        onProjectCreated(formData)
+      }
       // Reset form
       setFormData({
         projectName: "",
@@ -432,4 +433,3 @@ export const CreateProjectModal = ({ isOpen, onClose }) => {
     </div>
   )
 }
-
