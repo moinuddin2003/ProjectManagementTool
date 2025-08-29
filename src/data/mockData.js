@@ -34,7 +34,7 @@ export const mockFeatures = [
     name: "Feature 1",
     assignee: {
       name: "Jamal Jackson",
-      avatar: "https://testingbot.com/free-online-tools/random-avatar/300",
+      avatar: "https://xsgames.co/randomusers/assets/avatars/male/18.jpg",
     },
     progress: {
       dueDate: 75,
@@ -50,7 +50,7 @@ export const mockFeatures = [
     name: "Feature 2",
     assignee: {
       name: "Trisha Tran",
-      avatar: "https://testingbot.com/free-online-tools/random-avatar/400",
+      avatar: "https://xsgames.co/randomusers/assets/avatars/male/17.jpg",
     },
     progress: {
       dueDate: 60,
@@ -66,7 +66,7 @@ export const mockFeatures = [
     name: "Feature 3",
     assignee: {
       name: "Nancy Noo",
-      avatar: "https://testingbot.com/free-online-tools/random-avatar/500",
+      avatar: "https://xsgames.co/randomusers/assets/avatars/male/16.jpg",
     },
     progress: {
       dueDate: 90,
@@ -82,7 +82,7 @@ export const mockFeatures = [
     name: "Feature 4",
     assignee: {
       name: "Jamal Jackson",
-      avatar: "https://testingbot.com/free-online-tools/random-avatar/700",
+      avatar: "https://xsgames.co/randomusers/assets/avatars/male/15.jpg",
     },
     progress: {
       dueDate: 40,
@@ -98,7 +98,7 @@ export const mockFeatures = [
     name: "Feature 5",
     assignee: {
       name: "Trisha Tran",
-      avatar: "https://testingbot.com/free-online-tools/random-avatar/600",
+      avatar: "https://xsgames.co/randomusers/assets/avatars/male/12.jpg",
     },
     progress: {
       dueDate: 55,
@@ -114,7 +114,7 @@ export const mockFeatures = [
     name: "Feature 6",
     assignee: {
       name: "Nancy Noo",
-      avatar: "https://testingbot.com/free-online-tools/random-avatar/400",
+      avatar: "https://xsgames.co/randomusers/assets/avatars/male/13.jpg",
     },
     progress: {
       dueDate: 80,
