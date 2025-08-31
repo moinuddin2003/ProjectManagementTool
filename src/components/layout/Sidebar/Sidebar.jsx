@@ -2,7 +2,7 @@
 import { useState } from "react"
 import NavItem from "./NavItem"
 
-const Sidebar = ({ showMobileMenu, selectedNav, onNavClick, navItems }) => {
+const Sidebar = ({ showMobileMenu, navItems }) => {
   const [expandedItems, setExpandedItems] = useState(["Projects"]) // Projects expanded by default
 
   const toggleExpanded = (itemName) => {
@@ -20,12 +20,8 @@ const Sidebar = ({ showMobileMenu, selectedNav, onNavClick, navItems }) => {
           <NavItem
             key={item.name}
             item={item}
-            isActive={selectedNav === item.name}
             isExpanded={expandedItems.includes(item.name)}
             onToggleExpanded={toggleExpanded}
-            onClick={() => onNavClick(item)}
-            onSubItemClick={onNavClick}
-            selectedNav={selectedNav}
           />
         ))}
       </nav>
