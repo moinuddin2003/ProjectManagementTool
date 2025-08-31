@@ -1,6 +1,5 @@
-
 import { useState } from "react"
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from "react-router-dom"
 import DashboardLayout from "./components/layout/DashboardLayout/DashboardLayout"
 import LoginPage from "./components/auth/LoginPage"
 import ProjectsView from "./components/projects/ProjectsView"
@@ -17,7 +16,6 @@ function App() {
   const { isLoggedIn, loginForm, setLoginForm, isLoading, handleLogin } = useAuth()
 
   const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [selectedFeature, setSelectedFeature] = useState(null)
   const [showAIModal, setShowAIModal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false)
@@ -30,11 +28,6 @@ function App() {
       name: "Projects",
       icon: FolderOpen,
       path: "/projects"
-      // ,
-      // subItems: [
-      //   { name: "All Projects", icon: FolderOpen, path: "/projects" },
-      //   { name: "Active Projects", icon: CheckSquare, path: "/projects/active" },
-      // ],
     },
     { name: "Tasks", icon: CheckSquare, path: "/tasks" },
     { name: "AI Status Update", icon: AlertCircle, path: "/ai-status" },
@@ -90,64 +83,114 @@ function App() {
     setShowCreateProjectModal(false)
   }
 
-  const ProjectsRoute = () => (
-    <div className="space-y-6">
-      <ProjectsView projects={projects} onCreateProject={handleCreateProject} />
-    </div>
-  )
+  // Projects List Route Component
+  const ProjectsListRoute = () => {
+    const navigate = useNavigate()
+    
+    const handleProjectClick = (project) => {
+      navigate(`/projects/${project.id}`)
+    }
 
-  const TasksRoute = () => {
-    if (selectedFeature) {
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <button onClick={() => setSelectedFeature(null)} className="text-blue-600 hover:text-blue-800">
-              ← Back to Dashboard Features
-            </button>
-          </div>
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Dashboard features</h2>
-                <Button
-                  onClick={() => setShowAIModal(true)}
-                  className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600"
-                >
-                  <Bot className="w-4 h-4" />
-                  <span>Ask AI</span>
-                </Button>
-              </div>
+    return (
+      <div className="space-y-6">
+        <ProjectsView 
+          projects={projects} 
+          onCreateProject={handleCreateProject}
+          onProjectClick={handleProjectClick}
+        />
+      </div>
+    )
+  }
+
+  // Individual Project Route Component
+  const ProjectDetailRoute = () => {
+    const { id } = useParams()
+    const navigate = useNavigate()
+    const project = projects.find(p => p.id === parseInt(id))
+
+    if (!project) {
+      return <Navigate to="/projects" replace />
+    }
+
+    // Convert project to feature-like structure for FeatureCard
+    const projectAsFeature = {
+      id: project.id,
+      name: project.name,
+      assignee: {
+        name: project.owner,
+        avatar: "https://xsgames.co/randomusers/assets/avatars/male/18.jpg"
+      },
+      progress: {
+        dueDate: 75,
+        status: project.health === "Good" ? 80 : project.health === "At Risk" ? 45 : 60,
+        priority: 70,
+        dependencies: 65,
+      },
+      lastActivity: "Last activity...",
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={() => navigate("/projects")} 
+            className="text-blue-600 hover:text-blue-800"
+          >
+            ← Back to Projects
+          </button>
+        </div>
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Project Details</h2>
+              <Button
+                onClick={() => setShowAIModal(true)}
+                className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600"
+              >
+                <Bot className="w-4 h-4" />
+                <span>Ask AI</span>
+              </Button>
             </div>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <h3 className="text-lg font-medium text-gray-900">{selectedFeature.name}</h3>
-                  <img
-                    src={selectedFeature.assignee.avatar || "/placeholder.svg?height=32&width=32"}
-                    alt={selectedFeature.assignee.name}
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <span className="text-sm text-gray-600">{selectedFeature.assignee.name}</span>
-                </div>
-                <Button onClick={() => setShowStatusModal(true)} className="bg-blue-500 hover:bg-blue-600">
-                  + ADD SUBTASK
-                </Button>
-              </div>
-              <FeatureCard feature={selectedFeature} onClick={() => {}} variant="detailed" />
-              <div className="mt-6">
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Add a comment"
-                  className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
+          </div>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <h3 className="text-lg font-medium text-gray-900">{project.name}</h3>
+                <img
+                  src={projectAsFeature.assignee.avatar}
+                  alt={project.owner}
+                  className="w-8 h-8 rounded-full"
                 />
+                <span className="text-sm text-gray-600">{project.owner}</span>
               </div>
+              <Button onClick={() => setShowStatusModal(true)} className="bg-blue-500 hover:bg-blue-600">
+                + ADD SUBTASK
+              </Button>
+            </div>
+            <FeatureCard feature={projectAsFeature} onClick={() => {}} variant="detailed" />
+            <div className="mt-6">
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Add a comment"
+                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+              />
             </div>
           </div>
         </div>
-      )
+      </div>
+    )
+  }
+
+  // Tasks List Route Component
+  const TasksListRoute = () => {
+    const navigate = useNavigate()
+    
+    const handleFeatureClick = (feature) => {
+      navigate(`/tasks/${feature.id}`)
     }
+
     return (
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow">
@@ -157,8 +200,72 @@ function App() {
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {mockFeatures.map((feature) => (
-                <FeatureCard key={feature.id} feature={feature} onClick={setSelectedFeature} />
+                <FeatureCard key={feature.id} feature={feature} onClick={handleFeatureClick} />
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Individual Task Route Component
+  const TaskDetailRoute = () => {
+    const { id } = useParams()
+    const navigate = useNavigate()
+    const selectedFeature = mockFeatures.find(f => f.id === parseInt(id))
+
+    if (!selectedFeature) {
+      return <Navigate to="/tasks" replace />
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={() => navigate("/tasks")} 
+            className="text-blue-600 hover:text-blue-800"
+          >
+            ← Back to Dashboard Features
+          </button>
+        </div>
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Dashboard features</h2>
+              <Button
+                onClick={() => setShowAIModal(true)}
+                className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600"
+              >
+                <Bot className="w-4 h-4" />
+                <span>Ask AI</span>
+              </Button>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <h3 className="text-lg font-medium text-gray-900">{selectedFeature.name}</h3>
+                <img
+                  src={selectedFeature.assignee.avatar || "/placeholder.svg?height=32&width=32"}
+                  alt={selectedFeature.assignee.name}
+                  className="w-8 h-8 rounded-full"
+                />
+                <span className="text-sm text-gray-600">{selectedFeature.assignee.name}</span>
+              </div>
+              <Button onClick={() => setShowStatusModal(true)} className="bg-blue-500 hover:bg-blue-600">
+                + ADD SUBTASK
+              </Button>
+            </div>
+            <FeatureCard feature={selectedFeature} onClick={() => {}} variant="detailed" />
+            <div className="mt-6">
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Add a comment"
+                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+              />
             </div>
           </div>
         </div>
@@ -200,9 +307,16 @@ function App() {
       <DashboardLayout showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} navItems={navItems}>
         <Routes>
           <Route path="/login" element={<Navigate to="/projects" replace />} />
-          <Route path="/projects" element={<ProjectsRoute />} />
-          {/* <Route path="/projects/active" element={<ProjectsRoute />} /> */}
-          <Route path="/tasks" element={<TasksRoute />} />
+          
+          {/* Projects Routes */}
+          <Route path="/projects" element={<ProjectsListRoute />} />
+          <Route path="/projects/:id" element={<ProjectDetailRoute />} />
+          
+          {/* Tasks Routes */}
+          <Route path="/tasks" element={<TasksListRoute />} />
+          <Route path="/tasks/:id" element={<TaskDetailRoute />} />
+          
+          {/* Other Routes */}
           <Route path="/ai-status" element={<GenericPageContent title="AI Status Update" />} />
           <Route path="/ai-summaries" element={<GenericPageContent title="AI Summaries" />} />
           <Route path="/users" element={<GenericPageContent title="Users" />} />
@@ -212,11 +326,25 @@ function App() {
         </Routes>
       </DashboardLayout>
 
-      <AIAssistantModal isOpen={showAIModal} onClose={() => setShowAIModal(false)} taskName={selectedFeature?.name} />
+      <AIAssistantModal 
+        isOpen={showAIModal} 
+        onClose={() => setShowAIModal(false)} 
+        taskName={
+          // Get current item name from URL
+          window.location.pathname.includes('/tasks/') 
+            ? mockFeatures.find(f => f.id === parseInt(window.location.pathname.split('/').pop()))?.name
+            : projects.find(p => p.id === parseInt(window.location.pathname.split('/').pop()))?.name
+        } 
+      />
       <StatusUpdateModal
         isOpen={showStatusModal}
         onClose={() => setShowStatusModal(false)}
-        taskName={selectedFeature?.name}
+        taskName={
+          // Get current item name from URL
+          window.location.pathname.includes('/tasks/') 
+            ? mockFeatures.find(f => f.id === parseInt(window.location.pathname.split('/').pop()))?.name
+            : projects.find(p => p.id === parseInt(window.location.pathname.split('/').pop()))?.name
+        }
       />
       <CreateProjectModal
         isOpen={showCreateProjectModal}
@@ -226,5 +354,5 @@ function App() {
     </Router>
   )
 }
-
+  
 export default App
