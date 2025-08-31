@@ -1,4 +1,4 @@
-"use client"
+
 import { Plus, Filter, ChevronDown } from "lucide-react"
 
 const ProjectsControls = ({ onCreateProject }) => {

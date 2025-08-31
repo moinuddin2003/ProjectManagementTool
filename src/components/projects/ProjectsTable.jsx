@@ -1,4 +1,4 @@
-"use client"
+
 
 import ProjectRow from "./ProjectRow"
 

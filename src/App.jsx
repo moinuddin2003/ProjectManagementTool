@@ -1,4 +1,4 @@
-"use client"
+
 import { useState } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import DashboardLayout from "./components/layout/DashboardLayout/DashboardLayout"
@@ -29,11 +29,12 @@ function App() {
     {
       name: "Projects",
       icon: FolderOpen,
-      path: "/projects",
-      subItems: [
-        { name: "All Projects", icon: FolderOpen, path: "/projects" },
-        { name: "Active Projects", icon: CheckSquare, path: "/projects/active" },
-      ],
+      path: "/projects"
+      // ,
+      // subItems: [
+      //   { name: "All Projects", icon: FolderOpen, path: "/projects" },
+      //   { name: "Active Projects", icon: CheckSquare, path: "/projects/active" },
+      // ],
     },
     { name: "Tasks", icon: CheckSquare, path: "/tasks" },
     { name: "AI Status Update", icon: AlertCircle, path: "/ai-status" },
@@ -200,7 +201,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Navigate to="/projects" replace />} />
           <Route path="/projects" element={<ProjectsRoute />} />
-          <Route path="/projects/active" element={<ProjectsRoute />} />
+          {/* <Route path="/projects/active" element={<ProjectsRoute />} /> */}
           <Route path="/tasks" element={<TasksRoute />} />
           <Route path="/ai-status" element={<GenericPageContent title="AI Status Update" />} />
           <Route path="/ai-summaries" element={<GenericPageContent title="AI Summaries" />} />

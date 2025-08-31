@@ -1,4 +1,4 @@
-"use client"
+
 
 export const FeatureCard = ({ feature, onClick, variant = "default" }) => {
   const getProgressColor = (value) => {

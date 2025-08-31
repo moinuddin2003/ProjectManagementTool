@@ -1,4 +1,4 @@
-// "use client"
+// 
 // import { Bell, Menu } from "lucide-react"
 
 // export const Header = ({ onMenuClick, userName = "Carter Kenter" }) => {
@@ -37,7 +37,7 @@
 // }
 
 
-"use client"
+
 import { Menu } from "lucide-react"
 import Logo from "../../common/Logo"
 import SearchBar from "./SearchBar"

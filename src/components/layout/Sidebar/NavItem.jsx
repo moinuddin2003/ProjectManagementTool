@@ -1,4 +1,4 @@
-"use client"
+
 import { ChevronDown } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 

@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState } from "react"
 import { X, Calendar, Upload, File, Trash2 } from "lucide-react"

@@ -1,4 +1,4 @@
-"use client"
+
 import { useState } from "react"
 import { BarChart3 } from "lucide-react"
 
