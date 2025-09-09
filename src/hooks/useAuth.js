@@ -1,54 +1,164 @@
-
-import { useState, useEffect } from "react"
+import { useState, useEffect } from 'react'
 
 export const useAuth = () => {
-  // Initialize state from localStorage if available
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('isLoggedIn') === 'true'
-    }
-    return false
-  })
-  
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Login form state
   const [loginForm, setLoginForm] = useState({
     email: "",
-    password: "",
+    password: ""
   })
 
-  // Update localStorage whenever login state changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('isLoggedIn', isLoggedIn.toString())
-    }
-  }, [isLoggedIn])
+  // Register form state
+  const [registerForm, setRegisterForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phoneNo: "",
+    designation: ""
+  })
 
+  // Check if user is already logged in on app start
+  useEffect(() => {
+    const token = localStorage.getItem('authToken')
+    if (token) {
+      setIsLoggedIn(true)
+    }
+  }, [])
+
+  // Login function
   const handleLogin = async () => {
     setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoggedIn(true)
+    
+    try {
+      const response = await fetch('https://pm.makeamoveltd.com/public/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          email: loginForm.email,
+          password: loginForm.password
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        const token = data.token || data.data?.token || data.access_token
+        
+        if (token) {
+          localStorage.setItem('authToken', token)
+          localStorage.setItem('user', JSON.stringify(data.user || data.data?.user))
+          setIsLoggedIn(true)
+          
+          // Reset form
+          setLoginForm({ email: "", password: "" })
+        } else {
+          throw new Error('No token received from server')
+        }
+      } else {
+        throw new Error(data.message || 'Login failed')
+      }
+      
+    } catch (error) {
+      console.error('Login error:', error)
+      alert(error.message || 'Login failed. Please try again.')
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
-  const logout = () => {
+  // Register function
+  const handleRegister = async () => {
+    setIsLoading(true)
+    
+    try {
+      // Transform frontend form data to match your API structure
+      const apiPayload = {
+        name: `${registerForm.firstName} ${registerForm.lastName}`,
+        email: registerForm.email,
+        password: registerForm.password,
+        password_confirmation: registerForm.confirmPassword,
+        slack_id: "U12345", // You might want to make this dynamic or optional
+        phone_no: registerForm.phoneNo || "+1234567890",
+        designation: registerForm.designation || "Developer"
+      }
+
+      const response = await fetch('https://pm.makeamoveltd.com/public/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(apiPayload)
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        const token = data.token || data.data?.token || data.access_token
+        
+        if (token) {
+          localStorage.setItem('authToken', token)
+          localStorage.setItem('user', JSON.stringify(data.user || data.data?.user))
+          setIsLoggedIn(true)
+          
+          // Reset form
+          setRegisterForm({
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+            phoneNo: "",
+            designation: ""
+          })
+        } else {
+          throw new Error('No token received from server')
+        }
+      } else {
+        throw new Error(data.message || 'Registration failed')
+      }
+      
+    } catch (error) {
+      console.error('Registration error:', error)
+      alert(error.message || 'Registration failed. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('user')
     setIsLoggedIn(false)
     setLoginForm({ email: "", password: "" })
-    // Clear from localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('isLoggedIn')
-    }
+    setRegisterForm({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phoneNo: "",
+      designation: ""
+    })
   }
 
   return {
     isLoggedIn,
-    user: isLoggedIn ? { id: 1, name: "User" } : null,
-    loading: isLoading,
+    isLoading,
     loginForm,
     setLoginForm,
-    isLoading,
+    registerForm,
+    setRegisterForm,
     handleLogin,
-    logout,
+    handleRegister,
+    handleLogout
   }
 }

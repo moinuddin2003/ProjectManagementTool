@@ -2,6 +2,7 @@ import { useState } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from "react-router-dom"
 import DashboardLayout from "./components/layout/DashboardLayout/DashboardLayout"
 import LoginPage from "./components/auth/LoginPage"
+import RegisterPage from "./components/auth/RegisterPage" // Add this import
 import ProjectsView from "./components/projects/ProjectsView"
 import { FeatureCard } from "./components/features/FeatureCard"
 import { AIAssistantModal } from "./components/features/AIAssistantModal"
@@ -13,7 +14,16 @@ import { mockProjects, mockFeatures } from "./data/mockData"
 import { Bot, FolderOpen, CheckSquare, Users, MessageCircle, AlertCircle, FileText } from "lucide-react"
 
 function App() {
-  const { isLoggedIn, loginForm, setLoginForm, isLoading, handleLogin } = useAuth()
+  const { 
+    isLoggedIn, 
+    loginForm, 
+    setLoginForm, 
+    registerForm, 
+    setRegisterForm, 
+    isLoading, 
+    handleLogin, 
+    handleRegister 
+  } = useAuth()
 
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showAIModal, setShowAIModal] = useState(false)
@@ -287,7 +297,7 @@ function App() {
       <Router>
         <Routes>
           <Route
-            path="*"
+            path="/login"
             element={
               <LoginPage
                 loginForm={loginForm}
@@ -297,6 +307,19 @@ function App() {
               />
             }
           />
+          <Route
+            path="/register"
+            element={
+              <RegisterPage
+                registerForm={registerForm}
+                setRegisterForm={setRegisterForm}
+                onRegister={handleRegister}
+                isLoading={isLoading}
+              />
+            }
+          />
+          {/* Redirect all other routes to login when not authenticated */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
     )
@@ -307,6 +330,7 @@ function App() {
       <DashboardLayout showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} navItems={navItems}>
         <Routes>
           <Route path="/login" element={<Navigate to="/projects" replace />} />
+          <Route path="/register" element={<Navigate to="/projects" replace />} />
           
           {/* Projects Routes */}
           <Route path="/projects" element={<ProjectsListRoute />} />

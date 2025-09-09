@@ -1,8 +1,9 @@
-
 import { useState } from "react"
 import { BarChart3 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 const LoginForm = ({ loginForm, setLoginForm, onLogin, isLoading }) => {
+  const navigate = useNavigate()
   const [errors, setErrors] = useState({ email: "", password: "" })
 
   const validateEmail = (email) => {
@@ -62,6 +63,10 @@ const LoginForm = ({ loginForm, setLoginForm, onLogin, isLoading }) => {
     }
   }
 
+  const handleRegisterClick = () => {
+    navigate('/register')
+  }
+
   return (
     <div className="flex-1 p-8 lg:p-12 flex items-center justify-center">
       <div className="w-full max-w-md">
@@ -104,7 +109,11 @@ const LoginForm = ({ loginForm, setLoginForm, onLogin, isLoading }) => {
             </div>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <button type="button" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+            <button 
+              type="button" 
+              onClick={handleRegisterClick}
+              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            >
               Register
             </button>
             <button type="button" className="text-gray-600 hover:text-gray-700 transition-colors">
