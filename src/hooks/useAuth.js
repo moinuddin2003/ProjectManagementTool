@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react'
+"use client"
+
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  
+
   // Login form state
   const [loginForm, setLoginForm] = useState({
     email: "",
-    password: ""
+    password: "",
   })
 
   // Register form state
@@ -18,56 +21,58 @@ export const useAuth = () => {
     password: "",
     confirmPassword: "",
     phoneNo: "",
-    designation: ""
+    designation: "",
   })
 
   // Check if user is already logged in on app start
   useEffect(() => {
-    const token = localStorage.getItem('authToken')
+    const token = localStorage.getItem("authToken")
     if (token) {
       setIsLoggedIn(true)
     }
   }, [])
 
+  // Navigation hook for logout redirect
+  // const navigate = useNavigate()
+
   // Login function
   const handleLogin = async () => {
     setIsLoading(true)
-    
+
     try {
-      const response = await fetch('https://pm.makeamoveltd.com/public/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("https://pm.makeamoveltd.com/public/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           email: loginForm.email,
-          password: loginForm.password
-        })
+          password: loginForm.password,
+        }),
       })
 
       const data = await response.json()
 
       if (response.ok) {
         const token = data.token || data.data?.token || data.access_token
-        
+
         if (token) {
-          localStorage.setItem('authToken', token)
-          localStorage.setItem('user', JSON.stringify(data.user || data.data?.user))
+          localStorage.setItem("authToken", token)
+          localStorage.setItem("user", JSON.stringify(data.user || data.data?.user))
           setIsLoggedIn(true)
-          
+
           // Reset form
           setLoginForm({ email: "", password: "" })
         } else {
-          throw new Error('No token received from server')
+          throw new Error("No token received from server")
         }
       } else {
-        throw new Error(data.message || 'Login failed')
+        throw new Error(data.message || "Login failed")
       }
-      
     } catch (error) {
-      console.error('Login error:', error)
-      alert(error.message || 'Login failed. Please try again.')
+      console.error("Login error:", error)
+      alert(error.message || "Login failed. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -76,7 +81,7 @@ export const useAuth = () => {
   // Register function
   const handleRegister = async () => {
     setIsLoading(true)
-    
+
     try {
       // Transform frontend form data to match your API structure
       const apiPayload = {
@@ -86,28 +91,28 @@ export const useAuth = () => {
         password_confirmation: registerForm.confirmPassword,
         slack_id: "U12345", // You might want to make this dynamic or optional
         phone_no: registerForm.phoneNo || "+1234567890",
-        designation: registerForm.designation || "Developer"
+        designation: registerForm.designation || "Developer",
       }
 
-      const response = await fetch('https://pm.makeamoveltd.com/public/api/auth/register', {
-        method: 'POST',
+      const response = await fetch("https://pm.makeamoveltd.com/public/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        body: JSON.stringify(apiPayload)
+        body: JSON.stringify(apiPayload),
       })
 
       const data = await response.json()
 
       if (response.ok) {
         const token = data.token || data.data?.token || data.access_token
-        
+
         if (token) {
-          localStorage.setItem('authToken', token)
-          localStorage.setItem('user', JSON.stringify(data.user || data.data?.user))
+          localStorage.setItem("authToken", token)
+          localStorage.setItem("user", JSON.stringify(data.user || data.data?.user))
           setIsLoggedIn(true)
-          
+
           // Reset form
           setRegisterForm({
             firstName: "",
@@ -116,27 +121,25 @@ export const useAuth = () => {
             password: "",
             confirmPassword: "",
             phoneNo: "",
-            designation: ""
+            designation: "",
           })
         } else {
-          throw new Error('No token received from server')
+          throw new Error("No token received from server")
         }
       } else {
-        throw new Error(data.message || 'Registration failed')
+        throw new Error(data.message || "Registration failed")
       }
-      
     } catch (error) {
-      console.error('Registration error:', error)
-      alert(error.message || 'Registration failed. Please try again.')
+      console.error("Registration error:", error)
+      alert(error.message || "Registration failed. Please try again.")
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Logout function
   const handleLogout = () => {
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('user')
+    localStorage.removeItem("authToken")
+    localStorage.removeItem("user")
     setIsLoggedIn(false)
     setLoginForm({ email: "", password: "" })
     setRegisterForm({
@@ -146,8 +149,10 @@ export const useAuth = () => {
       password: "",
       confirmPassword: "",
       phoneNo: "",
-      designation: ""
+      designation: "",
     })
+    // Force page reload to trigger navigation to login
+    window.location.href = "/login"
   }
 
   return {
@@ -159,6 +164,6 @@ export const useAuth = () => {
     setRegisterForm,
     handleLogin,
     handleRegister,
-    handleLogout
+    handleLogout,
   }
 }
