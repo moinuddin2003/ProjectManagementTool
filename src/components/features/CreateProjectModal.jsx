@@ -1,44 +1,32 @@
-
+"use client"
 
 import { useState } from "react"
-import { X, Calendar, Upload, File, Trash2 } from "lucide-react"
+import { X, Calendar, Users } from "lucide-react"
+import { projectApi, mockUsers } from "../../services/projectApi"
 
 export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
   const [formData, setFormData] = useState({
     projectName: "",
     description: "",
     projectType: "",
+    priorityLevel: "medium",
+    devInstruction: "",
     client: "",
     startDate: "",
     endDate: "",
     estimatedDuration: "",
+    memberIds: [],
   })
 
   const [attachments, setAttachments] = useState([])
   const [dragActive, setDragActive] = useState(false)
-
   const [errors, setErrors] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedMembers, setSelectedMembers] = useState([])
 
-  const projectTypes = [
-    "Software Development",
-    "Marketing",
-    "Construction",
-    "Internal",
-    "Research & Development",
-    "Design",
-    "Consulting",
-  ]
+  const projectTypes = ["epic", "feature", "bug", "task", "story"]
 
-  const clients = [
-    "Acme Corp",
-    "Tech Solutions Inc",
-    "Global Industries",
-    "Startup Ventures",
-    "Enterprise Systems",
-    "Other",
-  ]
-
-  if (!isOpen) return null
+  const priorityLevels = ["low", "medium", "high"]
 
   const calculateDuration = (start, end) => {
     if (!start || !end) return ""
@@ -146,6 +134,20 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
 
+  const handleMemberToggle = (userId) => {
+    const isSelected = selectedMembers.includes(userId)
+    let newSelectedMembers
+
+    if (isSelected) {
+      newSelectedMembers = selectedMembers.filter((id) => id !== userId)
+    } else {
+      newSelectedMembers = [...selectedMembers, userId]
+    }
+
+    setSelectedMembers(newSelectedMembers)
+    setFormData({ ...formData, memberIds: newSelectedMembers })
+  }
+
   const validateForm = () => {
     const newErrors = {}
 
@@ -173,24 +175,39 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (validateForm()) {
-      console.log("Creating project:", formData, "Attachments:", attachments)
+    if (!validateForm()) return
+
+    setIsSubmitting(true)
+    try {
+      const newProject = await projectApi.createProject(formData)
+
       if (onProjectCreated) {
-        onProjectCreated(formData)
+        onProjectCreated(newProject)
       }
+
       // Reset form
       setFormData({
         projectName: "",
         description: "",
         projectType: "",
+        priorityLevel: "medium",
+        devInstruction: "",
         client: "",
         startDate: "",
         endDate: "",
         estimatedDuration: "",
+        memberIds: [],
       })
       setAttachments([])
+      setSelectedMembers([])
+      onClose()
+    } catch (error) {
+      console.error("Error creating project:", error)
+      setErrors({ submit: error.message || "Failed to create project. Please try again." })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -198,11 +215,14 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     onClose()
     setErrors({})
     setAttachments([])
+    setSelectedMembers([])
   }
 
+  if (!isOpen) return null
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl my-8 mx-auto">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Create New Project</h2>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 p-1">
@@ -211,6 +231,13 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
+          {/* Error Message */}
+          {errors.submit && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-600">{errors.submit}</p>
+            </div>
+          )}
+
           {/* Basic Project Details */}
           <div className="space-y-4">
             <h3 className="text-base font-medium text-gray-900">Basic Project Details</h3>
@@ -246,45 +273,57 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
               />
             </div>
 
-            {/* Project Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Project Type / Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.projectType}
-                onChange={(e) => handleInputChange("projectType", e.target.value)}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.projectType ? "border-red-300" : "border-gray-300"
-                }`}
-              >
-                <option value="">Select project type</option>
-                {projectTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              {errors.projectType && <p className="mt-1 text-sm text-red-600">{errors.projectType}</p>}
+            {/* Project Type and Priority */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Project Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.projectType}
+                  onChange={(e) => handleInputChange("projectType", e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.projectType ? "border-red-300" : "border-gray-300"
+                  }`}
+                >
+                  <option value="">Select project type</option>
+                  {projectTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </option>
+                  ))}
+                </select>
+                {errors.projectType && <p className="mt-1 text-sm text-red-600">{errors.projectType}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Priority Level</label>
+                <select
+                  value={formData.priorityLevel}
+                  onChange={(e) => handleInputChange("priorityLevel", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {priorityLevels.map((level) => (
+                    <option key={level} value={level}>
+                      {level.charAt(0).toUpperCase() + level.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* Client/Company */}
+            {/* Dev Instructions */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Client / Company <span className="text-gray-400">(optional)</span>
+                Development Instructions <span className="text-gray-400">(optional)</span>
               </label>
-              <select
-                value={formData.client}
-                onChange={(e) => handleInputChange("client", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select client or leave blank</option>
-                {clients.map((client) => (
-                  <option key={client} value={client}>
-                    {client}
-                  </option>
-                ))}
-              </select>
+              <textarea
+                value={formData.devInstruction}
+                onChange={(e) => handleInputChange("devInstruction", e.target.value)}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                placeholder="Special instructions for development team"
+              />
             </div>
           </div>
 
@@ -348,67 +387,37 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
             </div>
           </div>
 
+          {/* Team Members */}
           <div className="space-y-4">
-            <h3 className="text-base font-medium text-gray-900">
-              Attachments <span className="text-gray-400">(Optional)</span>
+            <h3 className="text-base font-medium text-gray-900 flex items-center">
+              <Users className="w-4 h-4 mr-2" />
+              Team Members <span className="text-gray-400">(optional)</span>
             </h3>
 
-            {/* File Upload Area */}
-            <div
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                dragActive ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-              }`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600">
-                  <label htmlFor="file-upload" className="font-medium text-blue-600 hover:text-blue-500 cursor-pointer">
-                    Click to upload
-                  </label>{" "}
-                  or drag and drop
-                </p>
-                <p className="text-xs text-gray-500">PDF, DOC, DOCX, JPG, PNG, GIF up to 10MB</p>
-              </div>
-              <input
-                id="file-upload"
-                name="file-upload"
-                type="file"
-                className="sr-only"
-                multiple
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.txt"
-                onChange={handleFileInput}
-              />
+            <div className="space-y-2">
+              {mockUsers.map((user) => (
+                <label
+                  key={user.id}
+                  className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedMembers.includes(user.id)}
+                    onChange={() => handleMemberToggle(user.id)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                </label>
+              ))}
             </div>
 
-            {/* Uploaded Files List */}
-            {attachments.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">Uploaded Files:</p>
-                <div className="space-y-2">
-                  {attachments.map((attachment) => (
-                    <div key={attachment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <File className="h-5 w-5 text-gray-400" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{attachment.name}</p>
-                          <p className="text-xs text-gray-500">{formatFileSize(attachment.size)}</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeAttachment(attachment.id)}
-                        className="text-red-400 hover:text-red-600 p-1"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {selectedMembers.length > 0 && (
+              <p className="text-sm text-gray-600">
+                {selectedMembers.length} member{selectedMembers.length > 1 ? "s" : ""} selected
+              </p>
             )}
           </div>
 
@@ -417,15 +426,24 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
             <button
               type="button"
               onClick={handleClose}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center"
             >
-              Create Project
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Creating...
+                </>
+              ) : (
+                "Create Project"
+              )}
             </button>
           </div>
         </form>
