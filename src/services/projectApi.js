@@ -44,8 +44,6 @@ const transformProjectData = (apiProject) => {
     status: apiProject.status,
     priorityLevel: apiProject.priority_level,
     owner: apiProject.creator?.name || "Unknown",
-    health: getHealthFromStatus(apiProject.status),
-    healthColor: getHealthColorFromStatus(apiProject.status),
     startDate: formatDate(apiProject.timeline?.start),
     endDate: formatDate(apiProject.timeline?.end),
     creator: apiProject.creator,
@@ -73,28 +71,6 @@ const transformFormDataToApi = (formData) => {
 }
 
 // Helper functions
-const getHealthFromStatus = (status) => {
-  const statusMap = {
-    open: "Good",
-    in_progress: "Good",
-    on_hold: "At Risk",
-    completed: "Good",
-    cancelled: "At Risk",
-  }
-  return statusMap[status] || "Good"
-}
-
-const getHealthColorFromStatus = (status) => {
-  const colorMap = {
-    open: "green",
-    in_progress: "green",
-    on_hold: "yellow",
-    completed: "blue",
-    cancelled: "red",
-  }
-  return colorMap[status] || "green"
-}
-
 const formatDate = (dateString) => {
   if (!dateString) return ""
   return new Date(dateString).toLocaleDateString("en-US", {
@@ -109,13 +85,13 @@ export const projectApi = {
   // Get all projects with pagination
   async getProjects(perPage = 15, page = 1) {
     try {
-      const response = await fetch(`${BASE_URL}/projects?per_page=${perPage}`, {
+      const response = await fetch(`${BASE_URL}/projects?per_page=${perPage}&page=${page}`, {
         method: "GET",
         headers: createHeaders(),
       })
 
       const result = await handleResponse(response)
-      console.log(response, result)
+
       // Handle both single project and array responses
       if (result.data) {
         if (Array.isArray(result.data)) {
@@ -244,6 +220,175 @@ export const projectApi = {
       return transformProjectData(result.data)
     } catch (error) {
       console.error("Error removing member:", error)
+      throw error
+    }
+  },
+}
+
+// Task management APIs
+export const taskApi = {
+  // Get all tasks for a project
+  async getProjectTasks(projectId) {
+    try {
+      const response = await fetch(`${BASE_URL}/projects/${projectId}/tasks`, {
+        method: "GET",
+        headers: createHeaders(),
+      })
+
+      const result = await handleResponse(response)
+      return result.data || []
+    } catch (error) {
+      console.error("Error fetching project tasks:", error)
+      throw error
+    }
+  },
+
+  // Create new task
+  async createTask(projectId, taskData) {
+    try {
+      const response = await fetch(`${BASE_URL}/projects/${projectId}/tasks`, {
+        method: "POST",
+        headers: createHeaders(),
+        body: JSON.stringify(taskData),
+      })
+
+      const result = await handleResponse(response)
+      return result.data
+    } catch (error) {
+      console.error("Error creating task:", error)
+      throw error
+    }
+  },
+
+  // Update task
+  async updateTask(projectId, taskId, updateData) {
+    try {
+      const response = await fetch(`${BASE_URL}/projects/${projectId}/tasks/${taskId}`, {
+        method: "PUT",
+        headers: createHeaders(),
+        body: JSON.stringify(updateData),
+      })
+
+      const result = await handleResponse(response)
+      return result.data
+    } catch (error) {
+      console.error("Error updating task:", error)
+      throw error
+    }
+  },
+
+  // Delete task
+  async deleteTask(projectId, taskId) {
+    try {
+      const response = await fetch(`${BASE_URL}/projects/${projectId}/tasks/${taskId}`, {
+        method: "DELETE",
+        headers: createHeaders(),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      return true
+    } catch (error) {
+      console.error("Error deleting task:", error)
+      throw error
+    }
+  },
+}
+
+// File management APIs
+export const fileApi = {
+  // Get all files for a project
+  async getProjectFiles(projectId) {
+    try {
+      const response = await fetch(`${BASE_URL}/projects/${projectId}/files`, {
+        method: "GET",
+        headers: createHeaders(),
+      })
+
+      const result = await handleResponse(response)
+      return result.data || []
+    } catch (error) {
+      console.error("Error fetching project files:", error)
+      throw error
+    }
+  },
+
+  // Upload file to project
+  async uploadFile(projectId, file) {
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await fetch(`${BASE_URL}/projects/${projectId}/files`, {
+        method: "POST",
+        headers: createFileHeaders(),
+        body: formData,
+      })
+
+      const result = await handleResponse(response)
+      return result.data
+    } catch (error) {
+      console.error("Error uploading file:", error)
+      throw error
+    }
+  },
+
+  // Delete file
+  async deleteFile(projectId, fileId) {
+    try {
+      const response = await fetch(`${BASE_URL}/projects/${projectId}/files/${fileId}`, {
+        method: "DELETE",
+        headers: createHeaders(),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      return true
+    } catch (error) {
+      console.error("Error deleting file:", error)
+      throw error
+    }
+  },
+}
+
+// Slack integration APIs
+export const slackApi = {
+  // Send message to Slack
+  async sendMessage(channel, message) {
+    try {
+      const response = await fetch(`${BASE_URL}/slack/send`, {  
+        method: "POST",
+        headers: createHeaders(),
+        body: JSON.stringify({
+          channel,
+          message,
+        }),
+      })
+
+      const result = await handleResponse(response)
+      return result.data
+    } catch (error) {
+      console.error("Error sending Slack message:", error)
+      throw error
+    }
+  },
+
+  // Get Slack history
+  async getHistory(channelId, limit = 20) {
+    try {
+      const response = await fetch(`${BASE_URL}/slack/history?channel_id=${channelId}&limit=${limit}`, {
+        method: "GET",
+        headers: createHeaders(),
+      })
+
+      const result = await handleResponse(response)
+      return result.data || []
+    } catch (error) {
+      console.error("Error fetching Slack history:", error)
       throw error
     }
   },

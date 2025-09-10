@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Calendar, Users } from "lucide-react"
 import { projectApi, mockUsers } from "../../services/projectApi"
 
-export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
+export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onProjectEdited }) => {
   const [formData, setFormData] = useState({
     projectName: "",
     description: "",
@@ -27,6 +27,42 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
   const projectTypes = ["epic", "feature", "bug", "task", "story"]
 
   const priorityLevels = ["low", "medium", "high"]
+
+  useEffect(() => {
+    if (isOpen && project) {
+      // Populate form data if in edit mode
+      setFormData({
+        projectName: project.name || "",
+        description: project.description || "",
+        projectType: project.projectType || "",
+        priorityLevel: project.priorityLevel || "medium",
+        devInstruction: project.devInstruction || "",
+        client: project.client || "",
+        startDate: project.startDate || "",
+        endDate: project.endDate || "",
+        estimatedDuration: project.estimatedDuration || calculateDuration(project.startDate, project.endDate),
+        memberIds: project.members?.map((m) => m.id) || [],
+      })
+      setSelectedMembers(project.members?.map((m) => m.id) || [])
+    } else if (isOpen && !project) {
+      // Reset form if in create mode
+      setFormData({
+        projectName: "",
+        description: "",
+        projectType: "",
+        priorityLevel: "medium",
+        devInstruction: "",
+        client: "",
+        startDate: "",
+        endDate: "",
+        estimatedDuration: "",
+        memberIds: [],
+      })
+      setAttachments([])
+      setSelectedMembers([])
+    }
+    setErrors({})
+  }, [isOpen, project])
 
   const calculateDuration = (start, end) => {
     if (!start || !end) return ""
@@ -181,31 +217,32 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
 
     setIsSubmitting(true)
     try {
-      const newProject = await projectApi.createProject(formData)
-
-      if (onProjectCreated) {
-        onProjectCreated(newProject)
+      if (project) {
+        // Update existing project
+        const updatedProject = await projectApi.updateProject(project.id, {
+          name: formData.projectName,
+          description: formData.description,
+          project_type: formData.projectType,
+          priority_level: formData.priorityLevel,
+          dev_instruction: formData.devInstruction,
+          timeline_start: formData.startDate,
+          timeline_end: formData.endDate,
+          member_ids: formData.memberIds,
+        })
+        if (onProjectEdited) {
+          onProjectEdited(updatedProject)
+        }
+      } else {
+        // Create new project
+        const newProject = await projectApi.createProject(formData)
+        if (onProjectCreated) {
+          onProjectCreated(newProject)
+        }
       }
-
-      // Reset form
-      setFormData({
-        projectName: "",
-        description: "",
-        projectType: "",
-        priorityLevel: "medium",
-        devInstruction: "",
-        client: "",
-        startDate: "",
-        endDate: "",
-        estimatedDuration: "",
-        memberIds: [],
-      })
-      setAttachments([])
-      setSelectedMembers([])
       onClose()
     } catch (error) {
-      console.error("Error creating project:", error)
-      setErrors({ submit: error.message || "Failed to create project. Please try again." })
+      console.error(project ? "Error updating project:" : "Error creating project:", error)
+      setErrors({ submit: error.message || `Failed to ${project ? "update" : "create"} project. Please try again.` })
     } finally {
       setIsSubmitting(false)
     }
@@ -224,7 +261,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl my-8 mx-auto">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Create New Project</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{project ? "Edit Project" : "Create New Project"}</h2>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 p-1">
             <X className="w-5 h-5" />
           </button>
@@ -439,10 +476,10 @@ export const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
               {isSubmitting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Creating...
+                  {project ? "Updating..." : "Creating..."}
                 </>
               ) : (
-                "Create Project"
+                project ? "Update Project" : "Create Project"
               )}
             </button>
           </div>
