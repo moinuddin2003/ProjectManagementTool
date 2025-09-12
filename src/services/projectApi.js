@@ -300,20 +300,20 @@ export const taskApi = {
 // File management APIs
 export const fileApi = {
   // Get all files for a project
-  async getProjectFiles(projectId) {
-    try {
-      const response = await fetch(`${BASE_URL}/projects/${projectId}/files`, {
-        method: "GET",
-        headers: createHeaders(),
-      })
+  // async getProjectFiles(projectId) {
+  //   try {
+  //     const response = await fetch(`${BASE_URL}/projects/${projectId}/files`, {
+  //       method: "GET",
+  //       headers: createHeaders(),
+  //     })
 
-      const result = await handleResponse(response)
-      return result.data || []
-    } catch (error) {
-      console.error("Error fetching project files:", error)
-      throw error
-    }
-  },
+  //     const result = await handleResponse(response)
+  //     return result.data || []
+  //   } catch (error) {
+  //     console.error("Error fetching project files:", error)
+  //     throw error
+  //   }
+  // },
 
   // Upload file to project
   async uploadFile(projectId, file) {
@@ -360,17 +360,19 @@ export const slackApi = {
   // Send message to Slack
   async sendMessage(channel, message) {
     try {
+      // The backend expects { channel: <projectName>, message: <text> }
       const response = await fetch(`${BASE_URL}/slack/send`, {  
         method: "POST",
         headers: createHeaders(),
         body: JSON.stringify({
-          channel,
-          message,
+          channel: channel, // project name as channel
+          message: message, // message text
         }),
       })
 
       const result = await handleResponse(response)
-      return result.data
+      // Response: { ok: true, channel_id, ts, message }
+      return result
     } catch (error) {
       console.error("Error sending Slack message:", error)
       throw error
@@ -386,7 +388,8 @@ export const slackApi = {
       })
 
       const result = await handleResponse(response)
-      return result.data || []
+      // Response: { ok: true, messages: [...] }
+      return result.messages || []
     } catch (error) {
       console.error("Error fetching Slack history:", error)
       throw error

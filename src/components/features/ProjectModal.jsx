@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { X, Calendar, Users } from "lucide-react"
-import { projectApi, mockUsers } from "../../services/projectApi"
+import { projectApi, fileApi, mockUsers } from "../../services/projectApi"
 
 export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onProjectEdited }) => {
   const [formData, setFormData] = useState({
@@ -23,10 +23,14 @@ export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onPro
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedMembers, setSelectedMembers] = useState([])
+  const [uploadingFiles, setUploadingFiles] = useState(false)
+  const [fileUploadError, setFileUploadError] = useState("")
 
   const projectTypes = ["epic", "feature", "bug", "task", "story"]
 
   const priorityLevels = ["low", "medium", "high"]
+
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     if (isOpen && project) {
@@ -214,12 +218,12 @@ export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onPro
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validateForm()) return
-
     setIsSubmitting(true)
     try {
+      let projId = project ? project.id : null
+      let resultProject = null
       if (project) {
-        // Update existing project
-        const updatedProject = await projectApi.updateProject(project.id, {
+        resultProject = await projectApi.updateProject(project.id, {
           name: formData.projectName,
           description: formData.description,
           project_type: formData.projectType,
@@ -229,15 +233,26 @@ export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onPro
           timeline_end: formData.endDate,
           member_ids: formData.memberIds,
         })
+        projId = resultProject.id
         if (onProjectEdited) {
-          onProjectEdited(updatedProject)
+          onProjectEdited(resultProject)
         }
       } else {
-        // Create new project
-        const newProject = await projectApi.createProject(formData)
+        resultProject = await projectApi.createProject(formData)
+        projId = resultProject.id
         if (onProjectCreated) {
-          onProjectCreated(newProject)
+          onProjectCreated(resultProject)
         }
+      }
+      // Debug: log attachments before upload
+      console.log('Attachments to upload:', attachments)
+      if (attachments.length > 0) {
+        setUploadingFiles(true)
+        await Promise.all(attachments.map(a => {
+          console.log('Uploading file:', a.file, 'to project:', projId)
+          return fileApi.uploadFile(projId, a.file)
+        }))
+        setUploadingFiles(false)
       }
       onClose()
     } catch (error) {
@@ -458,6 +473,41 @@ export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onPro
             )}
           </div>
 
+          {/* File Upload Area (always visible) */}
+          <div className="w-full mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Project Files (optional)</label>
+            <div
+              className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors mb-2 ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}
+              onDragOver={handleDrag}
+              onDragLeave={handleDrag}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              style={{ cursor: "pointer" }}
+            >
+              <p className="text-gray-700">Drop files here or click to select</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={handleFileInput}
+                className="hidden"
+              />
+              {uploadingFiles && <p className="text-blue-600 mt-2">Uploading...</p>}
+              {fileUploadError && <p className="text-red-600 mt-2">{fileUploadError}</p>}
+            </div>
+            {/* Show selected attachments */}
+            {attachments.length > 0 && (
+              <div className="mt-2 space-y-2">
+                {attachments.map((att) => (
+                  <div key={att.id} className="flex items-center justify-between bg-gray-50 rounded px-3 py-2">
+                    <span className="text-sm text-gray-800">{att.name} ({formatFileSize(att.size)})</span>
+                    <button type="button" onClick={() => removeAttachment(att.id)} className="text-red-500 text-xs">Remove</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Form Actions */}
           <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 border-t border-gray-200">
             <button
@@ -474,10 +524,10 @@ export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onPro
               className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center"
             >
               {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                <span className="flex items-center">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
                   {project ? "Updating..." : "Creating..."}
-                </>
+                </span>
               ) : (
                 project ? "Update Project" : "Create Project"
               )}

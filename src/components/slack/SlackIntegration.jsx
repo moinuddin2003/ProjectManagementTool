@@ -1,8 +1,6 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Send, MessageCircle, Hash } from "lucide-react"
-import { projectApi } from "../../services/projectApi"
+import { slackApi } from "../../services/projectApi"
 
 const SlackIntegration = ({ onClose }) => {
   const [messages, setMessages] = useState([])
@@ -10,24 +8,32 @@ const SlackIntegration = ({ onClose }) => {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState("")
   const [newMessage, setNewMessage] = useState("")
-  const [selectedChannel, setSelectedChannel] = useState("slack-bot-channel")
+  const [selectedChannel, setSelectedChannel] = useState({ id: "C09EA4BUZ7E", name: "general" }) // Use channel objects with both id and name
 
   const channels = [
-    { id: "slack-bot-channel", name: "#slack-bot-channel" },
-    { id: "C09DRNSNYDV", name: "#general" },
-    { id: "random", name: "#random" },
-    { id: "development", name: "#development" },
+    { id: "C09EA4BUZ7E", name: "general" },
+    { id: "C09DRNSNYDV", name: "dev" },
   ]
 
   useEffect(() => {
     fetchMessages()
+    // eslint-disable-next-line
   }, [selectedChannel])
 
   const fetchMessages = async () => {
     try {
       setLoading(true)
-      const response = await projectApi.getSlackHistory(selectedChannel, 20)
-      setMessages(response.data || [])
+      setError("")
+      const msgs = await slackApi.getHistory(selectedChannel.id, 20)
+      // Normalize messages for display
+      setMessages(
+        (msgs || []).map((msg) => ({
+          id: msg.ts,
+          text: msg.text,
+          user: msg.user || (msg.bot_profile?.name ?? "Bot"),
+          timestamp: Number(msg.ts) ? new Date(Number(msg.ts.split(".")[0]) * 1000) : new Date(),
+        }))
+      )
     } catch (err) {
       setError("Failed to load messages")
     } finally {
@@ -38,23 +44,21 @@ const SlackIntegration = ({ onClose }) => {
   const handleSendMessage = async (e) => {
     e.preventDefault()
     if (!newMessage.trim()) return
-
     setSending(true)
     setError("")
-
     try {
-      await projectApi.sendSlackMessage(selectedChannel, newMessage)
-      setNewMessage("")
-      // Add the message to local state for immediate feedback
+      // Send using channel name (not id)
+      const res = await slackApi.sendMessage(selectedChannel.name, newMessage)
       const newMsg = {
-        id: Date.now(),
-        text: newMessage,
+        id: res.ts,
+        text: res.message,
         user: "You",
-        timestamp: new Date().toISOString(),
-        channel: selectedChannel,
+        timestamp: new Date(),
       }
       setMessages((prev) => [newMsg, ...prev])
-    } catch (err) {
+      setNewMessage("")
+    } catch (error) {
+      console.error("Error sending message:", error)
       setError("Failed to send message")
     } finally {
       setSending(false)
@@ -62,7 +66,11 @@ const SlackIntegration = ({ onClose }) => {
   }
 
   const formatTimestamp = (timestamp) => {
-    return new Date(timestamp).toLocaleString()
+    if (!timestamp) return ""
+    if (typeof timestamp === "string" || typeof timestamp === "number") {
+      return new Date(timestamp).toLocaleString()
+    }
+    return timestamp.toLocaleString()
   }
 
   return (
@@ -88,13 +96,13 @@ const SlackIntegration = ({ onClose }) => {
               {channels.map((channel) => (
                 <button
                   key={channel.id}
-                  onClick={() => setSelectedChannel(channel.id)}
+                  onClick={() => setSelectedChannel(channel)}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 ${
-                    selectedChannel === channel.id ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"
+                    selectedChannel.id === channel.id ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
                   <Hash className="w-4 h-4" />
-                  {channel.name}
+                  #{channel.name}
                 </button>
               ))}
             </div>
@@ -141,7 +149,7 @@ const SlackIntegration = ({ onClose }) => {
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder={`Message ${channels.find((c) => c.id === selectedChannel)?.name || selectedChannel}`}
+                  placeholder={`Message #${selectedChannel.name}`}
                   className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={sending}
                 />

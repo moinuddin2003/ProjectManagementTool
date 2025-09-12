@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Edit2, Trash2, Users, MoreHorizontal, CheckSquare, FileText, MessageCircle } from "lucide-react"
+import { Edit2, Trash2, Users, MoreHorizontal, CheckSquare, MessageCircle } from "lucide-react"
 
 const ProjectRow = ({
   project,
@@ -10,7 +10,6 @@ const ProjectRow = ({
   onDeleteProject,
   onManageMembers,
   onManageTasks,
-  onManageFiles,
   onOpenSlack,
   onEditProject,
 }) => {
@@ -120,13 +119,7 @@ const ProjectRow = ({
                   <CheckSquare className="w-4 h-4 mr-2" />
                   Manage Tasks
                 </button>
-                <button
-                  onClick={handleManageFiles}
-                  className="action-button w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Manage Files
-                </button>
+                
                 <button
                   onClick={handleOpenSlack}
                   className="action-button w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
