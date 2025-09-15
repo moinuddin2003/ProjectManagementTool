@@ -4,7 +4,6 @@ import { useAuth } from "../../../hooks/useAuth"
 import ProfileModal from "../../profile/ProfileModal"
 import ChangePasswordModal from "../../profile/ChangePasswordModal"
 
-
 const UserProfile = () => {
   const { handleLogout } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -80,17 +79,17 @@ const UserProfile = () => {
         </button>
 
         {isDropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-lg border border-gray-200 py-2 z-50">
             <button
               onClick={handleProfileClick}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2 rounded-xl mx-2"
             >
               <Settings className="w-4 h-4" />
               <span>Edit Profile</span>
             </button>
             <button
               onClick={handlePasswordClick}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2 rounded-xl mx-2"
             >
               <Lock className="w-4 h-4" />
               <span>Change Password</span>
@@ -98,7 +97,7 @@ const UserProfile = () => {
             <hr className="my-2 border-gray-200" />
             <button
               onClick={handleLogoutClick}
-              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 rounded-xl mx-2"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>

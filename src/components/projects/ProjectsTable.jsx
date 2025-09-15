@@ -2,14 +2,23 @@ import ProjectRow from "./ProjectRow"
 
 const ProjectsTableHeader = () => {
   return (
-    <thead className="bg-gray-50/80 backdrop-blur-sm">
+    <thead className="bg-gradient-to-r from-slate-50 to-slate-100/50 backdrop-blur-sm">
       <tr>
-        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Project Name</th>
-        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Project Owner</th>
-        {/* <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Project Health</th> */}
-        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Start Date</th>
-        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">End Date</th>
-        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Actions</th>
+        <th className="text-left px-8 py-6 text-xs font-bold text-slate-700 tracking-wider uppercase border-b border-slate-200/50">
+          Project Name
+        </th>
+        <th className="text-left px-8 py-6 text-xs font-bold text-slate-700 tracking-wider uppercase border-b border-slate-200/50">
+          Project Owner
+        </th>
+        <th className="text-left px-8 py-6 text-xs font-bold text-slate-700 tracking-wider uppercase border-b border-slate-200/50">
+          Start Date
+        </th>
+        <th className="text-left px-8 py-6 text-xs font-bold text-slate-700 tracking-wider uppercase border-b border-slate-200/50">
+          End Date
+        </th>
+        <th className="text-left px-8 py-6 text-xs font-bold text-slate-700 tracking-wider uppercase border-b border-slate-200/50">
+          Actions
+        </th>
       </tr>
     </thead>
   )
@@ -55,7 +64,8 @@ const ProjectsTable = ({
   onEditProject,
 }) => {
   return (
-    <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+    /* Enhanced modern card styling with glass morphism effect */
+    <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <ProjectsTableHeader />

@@ -1,23 +1,33 @@
+"use client"
 
-import { Plus, Filter, ChevronDown } from "lucide-react"
+import { Plus, Filter, ChevronDown, Grid3X3, List } from "lucide-react"
 
 const ProjectsControls = ({ onCreateProject }) => {
   return (
-    <div className="flex items-center space-x-3">
-      <button className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-        <span className="text-sm text-gray-700">List View</span>
-        <ChevronDown className="w-4 h-4 text-gray-500 ml-2" />
+    <div className="flex items-center gap-4">
+      <div className="flex items-center bg-white/60 backdrop-blur-sm rounded-xl p-1 border border-white/20 shadow-lg">
+        <button className="flex items-center px-4 py-2.5 bg-white text-slate-700 rounded-lg shadow-sm transition-all duration-200 font-medium">
+          <List className="w-4 h-4 mr-2" />
+          <span className="text-sm">List</span>
+        </button>
+        <button className="flex items-center px-4 py-2.5 text-slate-500 hover:text-slate-700 rounded-lg transition-all duration-200 font-medium">
+          <Grid3X3 className="w-4 h-4 mr-2" />
+          <span className="text-sm">Grid</span>
+        </button>
+      </div>
+
+      <button className="flex items-center px-5 py-2.5 bg-white/60 backdrop-blur-sm border border-white/20 rounded-xl hover:bg-white/80 transition-all duration-200 shadow-lg hover:shadow-xl">
+        <Filter className="w-4 h-4 text-slate-500 mr-2" />
+        <span className="text-sm font-medium text-slate-700">Filter</span>
+        <ChevronDown className="w-4 h-4 text-slate-400 ml-2" />
       </button>
-      <button className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-        <Filter className="w-4 h-4 text-gray-500 mr-2" />
-        <span className="text-sm text-gray-700">Filter</span>
-      </button>
+
       <button
         onClick={onCreateProject}
-        className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl"
+        className="flex items-center px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold"
       >
         <Plus className="w-4 h-4 mr-2" />
-        <span className="text-sm font-medium">Create Project</span>
+        <span className="text-sm">Create Project</span>
       </button>
     </div>
   )
@@ -25,12 +35,15 @@ const ProjectsControls = ({ onCreateProject }) => {
 
 const ProjectsHeader = ({ projectCount = 0, onCreateProject }) => {
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-      <div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-          Projects ({projectCount})
+    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
+      <div className="space-y-3">
+        <h1 className="text-5xl font-bold text-slate-900 tracking-tight">
+          Projects
+          <span className="text-3xl font-normal text-slate-500 ml-3">({projectCount})</span>
         </h1>
-        <p className="text-gray-600 mt-1">Manage and track your active projects</p>
+        <p className="text-xl text-slate-600 leading-relaxed max-w-2xl">
+          Manage and track your active projects with enhanced visibility and modern tools
+        </p>
       </div>
       <ProjectsControls onCreateProject={onCreateProject} />
     </div>
