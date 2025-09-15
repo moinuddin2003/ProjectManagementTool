@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect, useRef } from "react"
 import { X, Calendar, Users } from "lucide-react"
 import { projectApi, fileApi, mockUsers } from "../../services/projectApi"
@@ -9,7 +7,7 @@ export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onPro
     projectName: "",
     description: "",
     projectType: "",
-    priorityLevel: "medium",
+    priorityLevel: "Medium",
     devInstruction: "",
     client: "",
     startDate: "",
@@ -26,7 +24,7 @@ export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onPro
   const [uploadingFiles, setUploadingFiles] = useState(false)
   const [fileUploadError, setFileUploadError] = useState("")
 
-  const projectTypes = ["epic", "feature", "bug", "task", "story"]
+  const projectTypes = ["epic", "bug", "task", "story"]
 
   const priorityLevels = ["low", "medium", "high"]
 
