@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { X, Lock, Eye, EyeOff } from "lucide-react"
 import { changePassword } from "../../services/profileApi"
+import { toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
   const [passwords, setPasswords] = useState({
@@ -19,7 +21,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     e.preventDefault()
 
     if (passwords.password !== passwords.password_confirmation) {
-      alert("New passwords do not match!")
+      toast.error("New passwords do not match!")
       return
     }
 
@@ -27,7 +29,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
     try {
       await changePassword(passwords)
-      alert("Password changed successfully!")
+      toast.success("Password changed successfully!")
       setPasswords({
         current_password: "",
         password: "",
@@ -36,7 +38,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
       onClose()
     } catch (error) {
       console.error("Failed to change password:", error)
-      alert("Failed to change password. Please check your current password and try again.")
+      toast.error("Failed to change password. Please check your current password and try again.")
     } finally {
       setIsLoading(false)
     }

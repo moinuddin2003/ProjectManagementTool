@@ -111,12 +111,12 @@ export const ProjectModal = ({ isOpen, onClose, project, onProjectCreated, onPro
       const maxSize = 10 * 1024 * 1024 // 10MB
 
       if (!validTypes.includes(file.type)) {
-        alert(`${file.name} is not a supported file type`)
+    toast.error(`${file.name} is not a supported file type`) // ✅ instead of alert
         return false
       }
 
       if (file.size > maxSize) {
-        alert(`${file.name} is too large. Maximum size is 10MB`)
+    toast.error(`${file.name} is too large. Maximum size is 10MB`) // ✅ instead of alert
         return false
       }
 

@@ -1,7 +1,6 @@
-"use client"
-
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -32,9 +31,6 @@ export const useAuth = () => {
     }
   }, [])
 
-  // Navigation hook for logout redirect
-  // const navigate = useNavigate()
-
   // Login function
   const handleLogin = async () => {
     setIsLoading(true)
@@ -62,6 +58,8 @@ export const useAuth = () => {
           localStorage.setItem("user", JSON.stringify(data.user || data.data?.user))
           setIsLoggedIn(true)
 
+          toast.success("Login successful!")
+
           // Reset form
           setLoginForm({ email: "", password: "" })
         } else {
@@ -72,7 +70,7 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error("Login error:", error)
-      alert(error.message || "Login failed. Please try again.")
+      toast.error(error.message || "Login failed. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -113,6 +111,8 @@ export const useAuth = () => {
           localStorage.setItem("user", JSON.stringify(data.user || data.data?.user))
           setIsLoggedIn(true)
 
+          toast.success("Registration successful!")
+
           // Reset form
           setRegisterForm({
             firstName: "",
@@ -131,7 +131,7 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error("Registration error:", error)
-      alert(error.message || "Registration failed. Please try again.")
+      toast.error(error.message || "Registration failed. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -151,8 +151,10 @@ export const useAuth = () => {
       phoneNo: "",
       designation: "",
     })
-    // Force page reload to trigger navigation to login
+ toast.info("You have been logged out.")
+    setTimeout(() => {
     window.location.href = "/login"
+  }, 300) // client-side navigation, toast stays visible
   }
 
   return {

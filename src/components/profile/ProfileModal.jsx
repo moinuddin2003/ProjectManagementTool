@@ -56,11 +56,11 @@ const ProfileModal = ({ isOpen, onClose }) => {
       // Update localStorage user data
       const user = JSON.parse(localStorage.getItem("user") || "{}")
       localStorage.setItem("user", JSON.stringify({ ...user, ...profile }))
-      alert("Profile updated successfully!")
+      toast.success("Profile updated successfully!") // ✅ instead of alert
       onClose()
     } catch (error) {
       console.error("Failed to update profile:", error)
-      alert("Failed to update profile. Please try again.")
+      toast.error("Failed to update profile. Please try again.") // ✅ instead of alert
     } finally {
       setIsSaving(false)
     }
